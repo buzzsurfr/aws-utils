@@ -94,7 +94,7 @@ if access_key_id:
     #  Delete old access key (based on Argument)
     #  Default: True
     #  Command: aws iam delete-access-key --access-key-id AKIA**************** --user-name {{AWS:UserName}}
-    #  **FUTURE** add try/catch logicf
+    #  **FUTURE** add try/catch logic
     if args.delete_access_key:
         if args.verbose:
             print "Deleting old access key..."
