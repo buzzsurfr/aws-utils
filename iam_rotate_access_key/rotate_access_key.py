@@ -13,13 +13,14 @@ __url__ = "https://github.com/buzzsurfr/aws-utils"
 #   Based on https://aws.amazon.com/blogs/security/how-to-rotate-access-keys-for-iam-users/
 
 import os
+import time
 import argparse
 import boto3
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--user-name", action="store", dest="user_name", required=True, help="UserName of the AWS user")
 parser.add_argument("--access-key-id", action="store", dest="access_key_id", help="Specific Access Key to replace")
-parser.add_argument("--profile", action="store", dest="profile", help="Local profile")
+parser.add_argument("--profile", action="store", dest="profile", default="default", help="Local profile")
 parser.add_argument("--delete", action="store_true", dest="delete_access_key", default=True, help="Delete old access key after inactivating (Default)")
 parser.add_argument("--no-delete", action="store_false", dest="delete_access_key", help="Do not delete old access key after inactivating")
 parser.add_argument("--verbose", action="store_true", dest="verbose", help="Verbose")
@@ -75,6 +76,11 @@ if args.verbose:
     print "Rotating access key locally..."
 os.system("aws --profile="+args.profile+" configure set aws_access_key_id "+new_access_key["AccessKeyId"])
 os.system("aws --profile="+args.profile+" configure set aws_secret_access_key "+new_access_key["SecretAccessKey"])
+
+#  Wait 5 seconds before deleting old key (propagation delay)
+if args.verbose:
+    print "Sleeping for 15 seconds to allow new access key to propagate..."
+time.sleep(15)
 
 #  Re-establish IAM connection using new credentials
 del iam
