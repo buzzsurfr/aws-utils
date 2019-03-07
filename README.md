@@ -3,6 +3,8 @@ Utilities and Scripts for Amazon Web Services (AWS)
 
 ## By Service
 
+* App Mesh
+  * [list_mesh_contents.py](appmesh_list_mesh_contents/) - Iterate through all of the resources of an AWS App Mesh and output to terminal
 * Elastic Compute Cloud (EC2)
   * [get_instance_limits.py](ec2_get_instance_limits/) - Get the EC2 instance per-type limits in a serialized format
 * Identity and Access Management (IAM)
