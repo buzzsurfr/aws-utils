@@ -11,3 +11,5 @@ Utilities and Scripts for Amazon Web Services (AWS)
   * [rotate_access_key.py](iam_rotate_access_key/) - Automatically rotates the oldest AWS Access Key locally. Optionally specify a profile to change the key for that profile.
 * Simple Notification Service (SNS)
   * [count_topics.py](sns_count_topics/) - Counts the number of SNS topics in an account/region. Uses pagination to scale to SNS Topic Limit, and includes a "checkpoint" to track progress.
+* Systems Manager (SSM)
+  * [get_all_parameters.py](ssm_get_all_parameters/) - Batch operation to return all parameters. Profile aware, and has a flag for decryption.
