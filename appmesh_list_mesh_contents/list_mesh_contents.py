@@ -29,3 +29,6 @@ for mesh in appmesh.list_meshes()['meshes']:
         for route in appmesh.list_routes(meshName=mesh['meshName'],virtualRouterName=router['virtualRouterName'])['routes']:
             print(route['arn'])
 
+    # Services
+    for service in appmesh.list_virtual_services(meshName=mesh['meshName'])['virtualServices']:
+        print(service['arn'])
