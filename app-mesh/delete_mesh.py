@@ -28,6 +28,17 @@ appmesh = boto3.client('appmesh')
 
 describe_mesh = appmesh.describe_mesh(meshName=mesh_name)
 if describe_mesh['ResponseMetadata']['HTTPStatusCode'] < 400:
+    # Gateways
+    for gateway in appmesh.list_virtual_gateways(meshName=mesh_name)['virtualGateways']:
+        # Gateway Routes
+        for gateway_route in appmesh.list_gateway_routes(meshName=mesh_name,virtualGatewayName=gateway['virtualGatewayName'])['gatewayRoutes']:
+            appmesh.delete_gateway_route(meshName=mesh_name,virtualGatewayName=gateway['virtualGatewayName'], gatewayRouteName=gateway_route['gatewayRouteName'])
+            if verbose:
+                print("Deleted: " + gateway_route['arn'])
+        appmesh.delete_virtual_gateway(meshName=mesh_name,virtualGatewayName=gateway['virtualGatewayName'])
+        if verbose:
+            print("Deleted: " + gateway['arn'])
+
     # Services
     for service in appmesh.list_virtual_services(meshName=mesh_name)['virtualServices']:
         appmesh.delete_virtual_service(meshName=mesh_name,virtualServiceName=service['virtualServiceName'])
