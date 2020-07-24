@@ -32,3 +32,10 @@ for mesh in appmesh.list_meshes()['meshes']:
     # Services
     for service in appmesh.list_virtual_services(meshName=mesh['meshName'])['virtualServices']:
         print(service['arn'])
+
+    # Gateways
+    for gateway in appmesh.list_virtual_gateways(meshName=mesh['meshName'])['virtualGateways']:
+        print(gateway['arn'])
+        # Gateway Routes
+        for gateway_route in appmesh.list_gateway_routes(meshName=mesh['meshName'],virtualGatewayName=gateway['virtualGatewayName'])['gatewayRoutes']:
+            print(gateway_route['arn'])
