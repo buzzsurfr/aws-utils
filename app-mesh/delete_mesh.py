@@ -12,7 +12,7 @@ __url__ = "https://github.com/buzzsurfr/aws-utils"
 # delete_mesh.py
 #   Iterate through all of the resources of an AWS App Mesh and delete them, then delete mesh after
 
-import os
+import sys
 import argparse
 import boto3
 
@@ -66,4 +66,4 @@ if describe_mesh['ResponseMetadata']['HTTPStatusCode'] < 400:
     print("Deleted: " + describe_mesh['mesh']['metadata']['arn'])
 else:
     print("Could not find mesh "+mesh_name)
-    os.exit(1)
+    sys.exit(1)
