@@ -1,0 +1,219 @@
+{
+  "Comment": "Delete a mesh and all dependent resources.",
+  "StartAt": "DescribeMesh",
+  "States": {
+    "DescribeMesh": {
+      "Type": "Task",
+      "Parameters": {
+        "MeshName.$": "$.MeshName"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:appmesh:describeMesh",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.TaskFailed",
+            "States.Timeout"
+          ],
+          "Next": "AnyException"
+        }
+      ],
+      "Next": "ListVirtualGateways"
+    },
+    "ListVirtualGateways": {
+      "Type": "Task",
+      "Parameters": {
+        "MeshName.$": "$.Mesh.MeshName"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:appmesh:listVirtualGateways",
+      "Next": "MapVirtualGateways",
+      "ResultPath": "$.VirtualGateways"
+    },
+    "MapVirtualGateways": {
+      "Type": "Map",
+      "Iterator": {
+        "StartAt": "ListGatewayRoutes",
+        "States": {
+          "ListGatewayRoutes": {
+            "Type": "Task",
+            "Parameters": {
+              "MeshName.$": "$.MeshName",
+              "VirtualGatewayName.$": "$.VirtualGatewayName"
+            },
+            "Resource": "arn:aws:states:::aws-sdk:appmesh:listGatewayRoutes",
+            "Next": "MapGatewayRoutes",
+            "ResultPath": "$.GatewayRoutes"
+          },
+          "MapGatewayRoutes": {
+            "Type": "Map",
+            "Iterator": {
+              "StartAt": "DeleteGatewayRoute",
+              "States": {
+                "DeleteGatewayRoute": {
+                  "Type": "Task",
+                  "Parameters": {
+                    "GatewayRouteName.$": "$.GatewayRouteName",
+                    "MeshName.$": "$.MeshName",
+                    "VirtualGatewayName.$": "$.VirtualGatewayName"
+                  },
+                  "Resource": "arn:aws:states:::aws-sdk:appmesh:deleteGatewayRoute",
+                  "End": true
+                }
+              }
+            },
+            "ItemsPath": "$.GatewayRoutes.GatewayRoutes",
+            "MaxConcurrency": 40,
+            "Next": "DeleteVirtualGateway",
+            "ResultPath": null
+          },
+          "DeleteVirtualGateway": {
+            "Type": "Task",
+            "Parameters": {
+              "MeshName.$": "$.MeshName",
+              "VirtualGatewayName.$": "$.VirtualGatewayName"
+            },
+            "Resource": "arn:aws:states:::aws-sdk:appmesh:deleteVirtualGateway",
+            "End": true
+          }
+        }
+      },
+      "ItemsPath": "$.VirtualGateways.VirtualGateways",
+      "MaxConcurrency": 40,
+      "Next": "ListVirtualServices",
+      "ResultPath": null
+    },
+    "ListVirtualServices": {
+      "Type": "Task",
+      "Parameters": {
+        "MeshName.$": "$.Mesh.MeshName"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:appmesh:listVirtualServices",
+      "Next": "MapVirtualServices",
+      "ResultPath": "$.VirtualServices"
+    },
+    "MapVirtualServices": {
+      "Type": "Map",
+      "Iterator": {
+        "StartAt": "DeleteVirtualService",
+        "States": {
+          "DeleteVirtualService": {
+            "Type": "Task",
+            "Parameters": {
+              "MeshName.$": "$.MeshName",
+              "VirtualServiceName.$": "$.VirtualServiceName"
+            },
+            "Resource": "arn:aws:states:::aws-sdk:appmesh:deleteVirtualService",
+            "End": true
+          }
+        }
+      },
+      "ItemsPath": "$.VirtualServices.VirtualServices",
+      "MaxConcurrency": 40,
+      "ResultPath": null,
+      "Next": "ListVirtualRouters"
+    },
+    "ListVirtualRouters": {
+      "Type": "Task",
+      "Parameters": {
+        "MeshName.$": "$.Mesh.MeshName"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:appmesh:listVirtualRouters",
+      "ResultPath": "$.VirtualRouters",
+      "Next": "MapVirtualRouters"
+    },
+    "MapVirtualRouters": {
+      "Type": "Map",
+      "Iterator": {
+        "StartAt": "ListRoutes",
+        "States": {
+          "ListRoutes": {
+            "Type": "Task",
+            "Parameters": {
+              "MeshName.$": "$.MeshName",
+              "VirtualRouterName.$": "$.VirtualRouterName"
+            },
+            "Resource": "arn:aws:states:::aws-sdk:appmesh:listRoutes",
+            "Next": "MapRoutes",
+            "ResultPath": "$.Routes"
+          },
+          "MapRoutes": {
+            "Type": "Map",
+            "Iterator": {
+              "StartAt": "DeleteRoute",
+              "States": {
+                "DeleteRoute": {
+                  "Type": "Task",
+                  "Parameters": {
+                    "RouteName.$": "$.RouteName",
+                    "MeshName.$": "$.MeshName",
+                    "VirtualRouterName.$": "$.VirtualRouterName"
+                  },
+                  "Resource": "arn:aws:states:::aws-sdk:appmesh:deleteRoute",
+                  "End": true
+                }
+              }
+            },
+            "ItemsPath": "$.Routes.Routes",
+            "MaxConcurrency": 40,
+            "ResultPath": null,
+            "Next": "DeleteVirtualRouter"
+          },
+          "DeleteVirtualRouter": {
+            "Type": "Task",
+            "Parameters": {
+              "MeshName.$": "$.MeshName",
+              "VirtualRouterName.$": "$.VirtualRouterName"
+            },
+            "Resource": "arn:aws:states:::aws-sdk:appmesh:deleteVirtualRouter",
+            "End": true
+          }
+        }
+      },
+      "ItemsPath": "$.VirtualRouters.VirtualRouters",
+      "MaxConcurrency": 40,
+      "ResultPath": null,
+      "Next": "ListVirtualNodes"
+    },
+    "ListVirtualNodes": {
+      "Type": "Task",
+      "Parameters": {
+        "MeshName.$": "$.Mesh.MeshName"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:appmesh:listVirtualNodes",
+      "ResultPath": "$.VirtualNodes",
+      "Next": "MapVirtualNodes"
+    },
+    "MapVirtualNodes": {
+      "Type": "Map",
+      "Iterator": {
+        "StartAt": "DeleteVirtualNode",
+        "States": {
+          "DeleteVirtualNode": {
+            "Type": "Task",
+            "End": true,
+            "Parameters": {
+              "MeshName.$": "$.MeshName",
+              "VirtualNodeName.$": "$.VirtualNodeName"
+            },
+            "Resource": "arn:aws:states:::aws-sdk:appmesh:deleteVirtualNode"
+          }
+        }
+      },
+      "ItemsPath": "$.VirtualNodes.VirtualNodes",
+      "MaxConcurrency": 40,
+      "ResultPath": null,
+      "Next": "DeleteMesh"
+    },
+    "DeleteMesh": {
+      "Type": "Task",
+      "Parameters": {
+        "MeshName.$": "$.Mesh.MeshName"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:appmesh:deleteMesh",
+      "End": true,
+      "ResultPath": null
+    },
+    "AnyException": {
+      "Type": "Fail"
+    }
+  }
+}
